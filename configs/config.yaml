@@ -1,0 +1,30 @@
+model:
+  encoder_pretrained: true
+  decoder_type: transformer   # 'transformer' or 'conv'
+  decoder_blocks: 5
+  embed_dim: 384
+  num_heads: 6
+  img_size: 560
+  patch_size: 16
+
+data:
+  data_root: data/
+  train_image_dir: train/images
+  train_depth_dir: train/depth
+  test_image_dir: test/images
+  num_workers: 4
+  val_split: 0.1
+
+training:
+  epochs: 50
+  batch_size: 8
+  lr: 1.0e-4
+  weight_decay: 0.01
+  grad_clip: 1.0
+  amp: true
+  seed: 42
+
+logging:
+  log_interval: 20
+  checkpoint_dir: checkpoints/
+  experiment_name: vit_depth

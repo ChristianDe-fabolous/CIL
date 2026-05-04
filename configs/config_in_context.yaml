@@ -1,0 +1,46 @@
+model:
+  encoder_pretrained: true
+  embed_dim: 384
+  num_heads: 6
+  num_cross_blocks: 3   # query attends to context
+  num_self_blocks: 5    # refine query tokens before depth head
+  img_size: 560
+  patch_size: 16
+
+data:
+  data_root: data/
+  train_image_dir: train/images
+  train_depth_dir: train/depth
+  test_image_dir: test/images
+  num_workers: 4
+  val_split: 0.1
+  num_context: 4        # K context (image, depth) pairs per query
+
+retrieval:
+  # Pick one: random | patch_sim | gt_depth_sim | learned
+  strategy: patch_sim
+
+  # patch_sim needs a prebuilt index:
+  #   python -m src.retrieval.build_index patch_sim --save_path data/retrieval/patch_sim.pt
+  index_path: data/retrieval/patch_sim.pt
+  retriever_encoder: vit_base_patch16_224   # or vit_large_patch16_224
+
+  # gt_depth_sim / learned need a prebuilt graph:
+  #   python -m src.retrieval.build_index gt_depth --save_path data/retrieval/gt_depth_graph.pt
+  #   python -m src.retrieval.build_index learned  --save_path data/retrieval/learned_graph.pt --checkpoint ...
+  graph_path: data/retrieval/gt_depth_graph.pt
+
+training:
+  epochs: 50
+  batch_size: 4           # smaller than baseline due to K extra images per sample
+  lr: 1.0e-4
+  encoder_lr_divisor: 50  # encoder LR = lr / 50 to stay near pretrained weights
+  weight_decay: 0.01
+  grad_clip: 1.0
+  amp: true
+  seed: 42
+
+logging:
+  log_interval: 20
+  checkpoint_dir: checkpoints/
+  experiment_name: in_context_depth

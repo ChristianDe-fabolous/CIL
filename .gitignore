@@ -1,0 +1,29 @@
+# Python bytecode
+__pycache__/
+*.py[cod]
+
+# Environments
+.venv/
+venv/
+env/
+.env/
+
+# PyTorch/Lightning weights and outputs
+*.pt
+*.pth
+*.ckpt
+outputs/
+lightning_logs/
+
+# TensorBoard logs
+runs/
+
+# Datasets (Add your specific data folder name)
+data/
+datasets/
+
+# OS specific
+.DS_Store
+
+# API keys and secrets
+*.env
