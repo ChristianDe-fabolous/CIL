@@ -26,14 +26,13 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspa
 
 
 def _collect_paths(data_root: str):
-    img_dir = os.path.join(data_root, "train", "images")
-    dep_dir = os.path.join(data_root, "train", "depth")
+    img_dir = os.path.join(data_root, "train")
     image_paths = sorted(
-        glob.glob(os.path.join(img_dir, "*.png")) +
-        glob.glob(os.path.join(img_dir, "*.jpg"))
+        glob.glob(os.path.join(img_dir, "*_rgb.png")) +
+        glob.glob(os.path.join(img_dir, "*_rgb.jpg"))
     )
     depth_paths = [
-        os.path.join(dep_dir, os.path.splitext(os.path.basename(p))[0] + ".npy")
+        os.path.join(img_dir, os.path.splitext(os.path.basename(p))[0].replace("_rgb", "_depth") + ".npy")
         for p in image_paths
     ]
     return image_paths, depth_paths

@@ -9,8 +9,8 @@ model:
 
 data:
   data_root: data/
-  train_image_dir: train/images
-  train_depth_dir: train/depth
+  train_image_dir: train
+  train_depth_dir: train
   test_image_dir: test/images
   num_workers: 4
   val_split: 0.1

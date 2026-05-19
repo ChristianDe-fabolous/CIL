@@ -29,6 +29,7 @@ class DepthDataset(Dataset):
 
     def _depth_path(self, image_path: str) -> str:
         stem = os.path.splitext(os.path.basename(image_path))[0]
+        stem = stem.replace("_rgb", "_depth")
         return os.path.join(self.depth_dir, stem + ".npy")
 
     def __len__(self) -> int:

@@ -42,7 +42,7 @@ def collect_paths(data_root: str, image_dir: str, depth_dir: str):
     if not image_paths:
         raise FileNotFoundError(f"No images in {img_dir}")
     depth_paths = [
-        os.path.join(dep_dir, os.path.splitext(os.path.basename(p))[0] + ".npy")
+        os.path.join(dep_dir, os.path.splitext(os.path.basename(p))[0].replace("_rgb", "_depth") + ".npy")
         for p in image_paths
     ]
     return image_paths, depth_paths

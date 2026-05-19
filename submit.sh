@@ -36,7 +36,7 @@ DECODER="${DECODER:-transformer}"             # transformer | conv  (baseline on
 EPOCHS="${EPOCHS:-}"                          # leave empty to use config default
 
 # ── Paths ─────────────────────────────────────────────────────────────────────
-REPO="$HOME/CIL"
+REPO="/work/scratch/cdeubel/CIL"
 DATA_DIR="/cluster/courses/cil/monocular-depth-estimation"
 SCRATCH_ENV="/work/scratch/cdeubel/CIL/.venv"
 
