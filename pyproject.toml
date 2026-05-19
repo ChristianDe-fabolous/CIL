@@ -1,0 +1,24 @@
+[project]
+name = "cil-depth"
+version = "0.1.0"
+requires-python = ">=3.11"
+dependencies = [
+    "torch>=2.0.0",
+    "torchvision>=0.15.0",
+    "timm>=0.9.0",
+    "numpy>=1.24.0",
+    "pillow>=9.0.0",
+    "pyyaml>=6.0",
+    "tqdm>=4.65.0",
+    "kagglehub>=0.3.0",
+]
+
+# Uncomment + remove the plain torch/torchvision entries above for CUDA training:
+# [tool.uv.sources]
+# torch = [{ index = "pytorch-cu124" }]
+# torchvision = [{ index = "pytorch-cu124" }]
+#
+# [[tool.uv.index]]
+# name = "pytorch-cu124"
+# url = "https://download.pytorch.org/whl/cu124"
+# explicit = true
