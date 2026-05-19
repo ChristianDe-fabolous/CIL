@@ -21,9 +21,6 @@
 #SBATCH --account=cil_jobs
 #SBATCH --gpus=2080ti:1
 #SBATCH --time=12:00:00
-#SBATCH --ntasks=1
-#SBATCH --cpus-per-task=4
-#SBATCH --mem=32G
 #SBATCH --mail-user=cdeubel@ethz.ch
 #SBATCH --mail-type=END,FAIL
 
