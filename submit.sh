@@ -8,40 +8,37 @@
 #SBATCH --mem=32G
 #SBATCH --gpus=1
 
-# ── conda ──────────────────────────────────────────────────────────────────
-__conda_setup="$('/cluster/courses/cil/envs/bin/conda' 'shell.bash' 'hook' 2>/dev/null)"
-if [ $? -eq 0 ]; then
-    eval "$__conda_setup"
-else
-    if [ -f "/cluster/courses/cil/envs/etc/profile.d/conda.sh" ]; then
-        . "/cluster/courses/cil/envs/etc/profile.d/conda.sh"
-    else
-        export PATH="/cluster/courses/cil/envs/bin:$PATH"
-    fi
-fi
-unset __conda_setup
-
 module load cuda/12.6.0
-conda activate /cluster/courses/cil/envs/envs/monocular-depth-estimation
 
-# ── paths ───────────────────────────────────────────────────────────────────
-PROJECT_DIR="$HOME/CIL"          # adjust if repo lives elsewhere on cluster
-DATA_DIR="/cluster/courses/cil/monocular-depth-estimation"
-BASE_CONFIG="${1:-configs/config.yaml}"
+# ── uv env on scratch ────────────────────────────────────────────────────────
+SCRATCH_ENV="/work/scratch/cdeubel/CIL/.venv"
+export UV_PROJECT_ENVIRONMENT="$SCRATCH_ENV"
 
+# install uv if not on PATH
+if ! command -v uv &>/dev/null; then
+    export PATH="$HOME/.local/bin:$PATH"
+fi
+
+PROJECT_DIR="$HOME/CIL"
 cd "$PROJECT_DIR"
 mkdir -p logs checkpoints
+
+uv sync --frozen
+
+# ── paths ────────────────────────────────────────────────────────────────────
+DATA_DIR="/cluster/courses/cil/monocular-depth-estimation"
+BASE_CONFIG="${1:-configs/config.yaml}"
 
 echo "Job:    $SLURM_JOB_ID"
 echo "Node:   $SLURM_NODELIST"
 echo "GPU:    $(nvidia-smi --query-gpu=name --format=csv,noheader)"
 echo "Config: $BASE_CONFIG"
-echo "Data:   $DATA_DIR"
+echo "Env:    $SCRATCH_ENV"
 
 # patch data_root to cluster path without touching the committed config
 PATCHED_CONFIG="logs/config_${SLURM_JOB_ID}.yaml"
-python - <<EOF
-import yaml, sys
+uv run python - <<EOF
+import yaml
 with open("$BASE_CONFIG") as f:
     cfg = yaml.safe_load(f)
 cfg["data"]["data_root"] = "$DATA_DIR"
@@ -49,4 +46,4 @@ with open("$PATCHED_CONFIG", "w") as f:
     yaml.dump(cfg, f)
 EOF
 
-python src/train.py --config "$PATCHED_CONFIG"
+uv run python src/train.py --config "$PATCHED_CONFIG"
