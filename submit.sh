@@ -18,7 +18,7 @@
 #SBATCH --job-name=CIL-detph
 #SBATCH --output=logs/slurm-%j.out
 #SBATCH --error=logs/slurm-%j.err
-#SBATCH --account=CIL
+#SBATCH --account=cil_jobs
 #SBATCH --gpus=2080ti:1
 #SBATCH --time=12:00:00
 #SBATCH --ntasks=1
