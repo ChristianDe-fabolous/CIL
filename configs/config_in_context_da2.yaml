@@ -1,0 +1,39 @@
+model:
+  encoder_type: depth_anything_v2
+  depth_anything_size: base    # small | base | large
+  # embed_dim, patch_size, patch_grid derived from encoder automatically
+  num_heads: 8                 # 768 / 8 = 96 per head
+  num_cross_blocks: 3
+  num_self_blocks: 5
+  img_size: 560
+  patch_size: 14               # DINOv2 uses 14, kept for DepthPatcher fallback
+
+data:
+  data_root: data/
+  train_image_dir: train
+  train_depth_dir: train
+  test_image_dir: test/images
+  num_workers: 3
+  val_split: 0.1
+  num_context: 4
+
+retrieval:
+  strategy: patch_sim
+  index_path: data/retrieval/patch_sim.pt
+  retriever_encoder: vit_base_patch16_224
+  graph_path: data/retrieval/gt_depth_graph.pt
+
+training:
+  epochs: 50
+  batch_size: 2                # larger embed_dim needs smaller batch on 2080 Ti
+  lr: 5.0e-5                   # lower LR — backbone already well pretrained
+  encoder_lr_divisor: 50
+  weight_decay: 0.01
+  grad_clip: 1.0
+  amp: true
+  seed: 42
+
+logging:
+  log_interval: 20
+  checkpoint_dir: checkpoints/
+  experiment_name: in_context_da2

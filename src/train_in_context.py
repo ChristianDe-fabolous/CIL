@@ -13,7 +13,7 @@ from torch.cuda.amp import GradScaler, autocast
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from src.in_context_dataset import InContextDataset
-from src.models.encoder import ViTEncoder
+from src.models.encoder import ViTEncoder, DepthAnythingEncoder
 from src.models.in_context_model import InContextDepthModel
 from src.retrieval.random_retriever import RandomRetriever
 from src.loss import silog_loss
@@ -174,19 +174,26 @@ def main():
     val_loader   = DataLoader(val_ds,   batch_size=bs, shuffle=False, num_workers=nw, pin_memory=True)
 
     # --- model ---
-    encoder = ViTEncoder(
-        pretrained=cfg["model"]["encoder_pretrained"],
-        img_size=img_size,
-        patch_size=cfg["model"]["patch_size"],
-    )
+    enc_type = cfg["model"].get("encoder_type", "vit")
+    if enc_type == "depth_anything_v2":
+        encoder = DepthAnythingEncoder(
+            size=cfg["model"].get("depth_anything_size", "base"),
+            img_size=img_size,
+        )
+    else:
+        encoder = ViTEncoder(
+            pretrained=cfg["model"]["encoder_pretrained"],
+            img_size=img_size,
+            patch_size=cfg["model"]["patch_size"],
+        )
     model = InContextDepthModel(
         encoder=encoder,
-        embed_dim=cfg["model"]["embed_dim"],
+        embed_dim=encoder.embed_dim,
         num_heads=cfg["model"]["num_heads"],
         num_cross_blocks=cfg["model"]["num_cross_blocks"],
         num_self_blocks=cfg["model"]["num_self_blocks"],
-        patch_grid=img_size // cfg["model"]["patch_size"],
-        patch_size=cfg["model"]["patch_size"],
+        patch_grid=encoder.patch_grid,
+        patch_size=encoder.patch_size,
     ).to(device)
     print(f"params={sum(p.numel() for p in model.parameters()) / 1e6:.1f}M")
 

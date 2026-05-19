@@ -4,7 +4,7 @@ model:
   decoder_blocks: 5
   embed_dim: 384
   num_heads: 6
-  img_size: 560
+  img_size: 224
   patch_size: 16
 
 data:
@@ -12,12 +12,12 @@ data:
   train_image_dir: train
   train_depth_dir: train
   test_image_dir: test/images
-  num_workers: 4
+  num_workers: 3
   val_split: 0.1
 
 training:
   epochs: 50
-  batch_size: 8
+  batch_size: 64
   lr: 1.0e-4
   weight_decay: 0.01
   grad_clip: 1.0

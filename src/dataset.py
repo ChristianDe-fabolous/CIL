@@ -40,7 +40,7 @@ class DepthDataset(Dataset):
         image = Image.open(img_path).convert("RGB")
         depth = np.load(self._depth_path(img_path)).astype(np.float32)
 
-        image = image.resize((self.img_size, self.img_size), Image.BILINEAR)
+        image = image.resize((self.img_size, self.img_size), Image.LANCZOS)
         depth_h, depth_w = depth.shape[:2]
         if depth_h != self.img_size or depth_w != self.img_size:
             depth = np.array(
@@ -74,7 +74,7 @@ class TestDataset(Dataset):
     def __getitem__(self, idx: int):
         img_path = self.image_paths[idx]
         image = Image.open(img_path).convert("RGB")
-        image = image.resize((self.img_size, self.img_size), Image.BILINEAR)
+        image = image.resize((self.img_size, self.img_size), Image.LANCZOS)
         image = TF.to_tensor(image)
         image = self.normalize(image)
         stem = os.path.splitext(os.path.basename(img_path))[0]
