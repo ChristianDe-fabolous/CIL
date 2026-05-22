@@ -174,7 +174,7 @@ dependencies = [
 
 [package.metadata]
 requires-dist = [
-    { name = "kaggle", specifier = ">=1.6.0" },
+    { name = "kaggle", specifier = ">=1.8.0" },
     { name = "kagglehub", specifier = ">=0.3.0" },
     { name = "numpy", specifier = ">=1.24.0" },
     { name = "pandas", specifier = ">=2.0.0" },
