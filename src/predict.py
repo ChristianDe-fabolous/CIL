@@ -50,7 +50,8 @@ def main():
                 preds = model(images)  # (B, 1, H, W)
             preds = preds.squeeze(1).cpu().numpy()  # (B, H, W)
             for pred, stem in zip(preds, stems):
-                np.save(os.path.join(args.output_dir, f"{stem}.npy"), pred)
+                out_stem = stem.replace("_rgb", "_depth")
+                np.save(os.path.join(args.output_dir, f"{out_stem}.npy"), pred)
 
     print(f"Saved {len(dataset)} predictions to {args.output_dir}")
 

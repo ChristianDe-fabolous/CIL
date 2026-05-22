@@ -19,8 +19,9 @@
 #SBATCH --mail-type=END,FAIL
 
 # ── Required ──────────────────────────────────────────────────────────────────
-: "${CHECKPOINT:?ERROR: set CHECKPOINT=/path/to/best.pth}"
-: "${TEST_DIR:?ERROR: set TEST_DIR=/path/to/test/images}"
+: "${CHECKPOINT:?ERROR: set CHECKPOINT=/work/scratch/cdeubel/CIL/checkpoints/vit_depth_transformer_pretrainedTrue
+/best.pth}"
+: "${TEST_DIR:?ERROR: set TEST_DIR=/cluster/courses/cil/monocular-depth-estimation/test/images}"
 
 # ── Defaults ──────────────────────────────────────────────────────────────────
 BATCH_SIZE="${BATCH_SIZE:-8}"

@@ -28,8 +28,7 @@ def main():
 
     for pred_path in pred_files:
         depth = np.load(pred_path)
-        idx = pred_path.stem.split("_")[-1]
-        img_id = f"test_{idx}_depth"
+        img_id = pred_path.stem  # already test_000001_depth
         rows.append({"id": img_id, "Depths": encode_depth(depth)})
 
     df = pd.DataFrame(rows, columns=["id", "Depths"])
