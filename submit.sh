@@ -98,5 +98,35 @@ CMD="uv run python src/${SCRIPT}.py --config $PATCHED_CONFIG"
 echo "CMD: $CMD"
 eval $CMD
 
+# ── Post-training: predict + submit (baseline train only) ────────────────────
+if [ "$SCRIPT" = "train" ]; then
+    # find the checkpoint written by this job
+    CKPT=$(find checkpoints -name "best.pth" -newer "$PATCHED_CONFIG" | head -1)
+    if [ -z "$CKPT" ]; then
+        echo "WARNING: no checkpoint found, skipping predict+submit"
+    else
+        PRED_DIR="predictions/${SLURM_JOB_ID}"
+        SUB_CSV="submissions/${SLURM_JOB_ID}/submission.csv"
+        mkdir -p "$(dirname "$SUB_CSV")"
+
+        echo "--- Predicting with $CKPT ---"
+        uv run python src/predict.py \
+            --checkpoint "$CKPT" \
+            --test_dir   "$DATA_DIR/test" \
+            --output_dir "$PRED_DIR"
+
+        echo "--- Building submission CSV ---"
+        uv run python create_submission.py \
+            --pred_dir "$PRED_DIR" \
+            --output   "$SUB_CSV"
+
+        echo "--- Uploading to Kaggle ---"
+        uv run kaggle competitions submit \
+            -c ethz-cil-monocular-depth-estimation-2026 \
+            -f "$SUB_CSV" \
+            -m "job ${SLURM_JOB_ID} / ${DECODER} decoder / $(date +%F)"
+    fi
+fi
+
 echo "========================================"
 echo "Job $SLURM_JOB_ID done."
