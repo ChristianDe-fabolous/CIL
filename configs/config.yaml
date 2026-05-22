@@ -11,7 +11,7 @@ data:
   data_root: data/
   train_image_dir: train
   train_depth_dir: train
-  test_image_dir: test/images
+  test_image_dir: test
   num_workers: 3
   val_split: 0.1
 
