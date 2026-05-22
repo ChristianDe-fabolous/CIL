@@ -7,7 +7,7 @@ import numpy as np
 import torch
 import torch.nn as nn
 from torch.utils.data import DataLoader, Subset
-from torch.cuda.amp import GradScaler, autocast
+from torch.amp import GradScaler, autocast
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
@@ -35,7 +35,7 @@ def train_one_epoch(model, loader, optimizer, scaler, device, amp, grad_clip, lo
     for i, (images, depths) in enumerate(loader):
         images, depths = images.to(device), depths.to(device)
         optimizer.zero_grad()
-        with autocast(enabled=amp):
+        with autocast("cuda", enabled=amp):
             preds = model(images)
             loss = silog_loss(preds, depths)
         scaler.scale(loss).backward()
@@ -132,7 +132,7 @@ def main():
     scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(
         optimizer, T_max=cfg["training"]["epochs"], eta_min=cfg["training"]["lr"] * 0.01
     )
-    scaler = GradScaler(enabled=cfg["training"]["amp"])
+    scaler = GradScaler("cuda", enabled=cfg["training"]["amp"])
 
     # --- checkpoint dir ---
     job_id = os.environ.get("SLURM_JOB_ID")

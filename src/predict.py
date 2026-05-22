@@ -4,7 +4,7 @@ import argparse
 import numpy as np
 import torch
 from torch.utils.data import DataLoader
-from torch.cuda.amp import autocast
+from torch.amp import autocast
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
@@ -39,14 +39,14 @@ def main():
     print(f"Loaded checkpoint (epoch {ckpt['epoch']}, val_si_rmse={ckpt.get('val_si_rmse', 'n/a'):.4f})")
 
     dataset = TestDataset(args.test_dir, img_size=cfg["model"]["img_size"])
-    loader  = DataLoader(dataset, batch_size=args.batch_size, shuffle=False, num_workers=4, pin_memory=True)
+    loader  = DataLoader(dataset, batch_size=args.batch_size, shuffle=False, num_workers=cfg["data"].get("num_workers", 3), pin_memory=True)
 
     os.makedirs(args.output_dir, exist_ok=True)
 
     with torch.no_grad():
         for images, stems in loader:
             images = images.to(device)
-            with autocast(enabled=cfg["training"]["amp"]):
+            with autocast("cuda", enabled=cfg["training"]["amp"]):
                 preds = model(images)  # (B, 1, H, W)
             preds = preds.squeeze(1).cpu().numpy()  # (B, H, W)
             for pred, stem in zip(preds, stems):
