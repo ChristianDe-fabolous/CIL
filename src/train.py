@@ -135,10 +135,12 @@ def main():
     scaler = GradScaler(enabled=cfg["training"]["amp"])
 
     # --- checkpoint dir ---
+    job_id = os.environ.get("SLURM_JOB_ID")
     run_name = (
         f"{cfg['logging']['experiment_name']}"
         f"_{cfg['model']['decoder_type']}"
         f"_pretrained{cfg['model']['encoder_pretrained']}"
+        + (f"_job{job_id}" if job_id else "")
     )
     ckpt_dir = os.path.join(cfg["logging"]["checkpoint_dir"], run_name)
     os.makedirs(ckpt_dir, exist_ok=True)
