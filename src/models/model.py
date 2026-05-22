@@ -4,21 +4,24 @@ import torch.nn as nn
 from .encoder import ViTEncoder
 from .decoder_transformer import TransformerDecoder
 from .decoder_conv import ConvDecoder
+from .upsampler import UpsamplerHead
 
 
 class DepthModel(nn.Module):
     def __init__(
         self,
         decoder_type: str = "transformer",
+        encoder_size: str = "small",
         pretrained: bool = True,
-        img_size: int = 560,
+        img_size: int = 224,
         patch_size: int = 16,
         decoder_blocks: int = 5,
-        embed_dim: int = 384,
-        num_heads: int = 6,
+        output_size: int = None,  # None = no learned upsampler
     ):
         super().__init__()
-        self.encoder = ViTEncoder(pretrained=pretrained, img_size=img_size, patch_size=patch_size)
+        self.encoder = ViTEncoder(size=encoder_size, pretrained=pretrained, img_size=img_size, patch_size=patch_size)
+        embed_dim  = self.encoder.embed_dim
+        num_heads  = self.encoder.num_heads
         patch_grid = img_size // patch_size
 
         if decoder_type == "transformer":
@@ -34,5 +37,10 @@ class DepthModel(nn.Module):
         else:
             raise ValueError(f"Unknown decoder_type: {decoder_type!r}")
 
+        self.upsampler = UpsamplerHead(output_size) if output_size else None
+
     def forward(self, x: torch.Tensor) -> torch.Tensor:
-        return self.decoder(self.encoder(x))
+        out = self.decoder(self.encoder(x))
+        if self.upsampler is not None:
+            out = self.upsampler(out)
+        return out

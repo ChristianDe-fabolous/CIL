@@ -1,11 +1,11 @@
 model:
-  encoder_size: small         # 'small' (384-dim) or 'base' (768-dim)
+  encoder_size: base          # 'small' (384-dim) or 'base' (768-dim)
   encoder_pretrained: true
-  decoder_type: transformer   # 'transformer' or 'conv'
+  decoder_type: transformer
   decoder_blocks: 5
   img_size: 560
   patch_size: 16
-  output_size: null           # null = decoder outputs img_size natively
+  output_size: null
 
 data:
   data_root: data/
@@ -17,7 +17,7 @@ data:
 
 training:
   epochs: 50
-  batch_size: 8               # reduced for 1225 tokens at 560×560
+  batch_size: 4               # base is 2x wider + 1225 tokens
   lr: 1.0e-4
   freeze_encoder: true
   weight_decay: 0.01

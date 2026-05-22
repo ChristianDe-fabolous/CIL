@@ -28,12 +28,12 @@ def main():
 
     model = DepthModel(
         decoder_type=cfg["model"]["decoder_type"],
+        encoder_size=cfg["model"].get("encoder_size", "small"),
         pretrained=False,
         img_size=cfg["model"]["img_size"],
         patch_size=cfg["model"]["patch_size"],
         decoder_blocks=cfg["model"]["decoder_blocks"],
-        embed_dim=cfg["model"]["embed_dim"],
-        num_heads=cfg["model"]["num_heads"],
+        output_size=cfg["model"].get("output_size", None),
     ).to(device)
     model.load_state_dict(ckpt["model"])
     model.eval()
@@ -49,7 +49,8 @@ def main():
             images = images.to(device)
             with autocast("cuda", enabled=cfg["training"]["amp"]):
                 preds = model(images)  # (B, 1, H, W)
-            if args.output_size != cfg["model"]["img_size"]:
+            model_output_size = cfg["model"].get("output_size") or cfg["model"]["img_size"]
+            if model_output_size != args.output_size:
                 preds = torch.nn.functional.interpolate(
                     preds, size=(args.output_size, args.output_size), mode="bilinear", align_corners=False
                 )

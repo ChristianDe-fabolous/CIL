@@ -85,8 +85,9 @@ def main():
     depth_dir  = os.path.join(cfg["data"]["data_root"], cfg["data"]["train_depth_dir"])
     img_size   = cfg["model"]["img_size"]
 
-    train_dataset = DepthDataset(image_dir, depth_dir, img_size=img_size, augment=True)
-    val_dataset   = DepthDataset(image_dir, depth_dir, img_size=img_size, augment=False)
+    output_size   = cfg["model"].get("output_size", None)
+    train_dataset = DepthDataset(image_dir, depth_dir, img_size=img_size, depth_size=output_size, augment=True)
+    val_dataset   = DepthDataset(image_dir, depth_dir, img_size=img_size, depth_size=output_size, augment=False)
 
     n = len(train_dataset)
     indices = torch.randperm(n, generator=torch.Generator().manual_seed(cfg["training"]["seed"])).tolist()
@@ -105,12 +106,12 @@ def main():
     # --- model ---
     model = DepthModel(
         decoder_type=cfg["model"]["decoder_type"],
+        encoder_size=cfg["model"].get("encoder_size", "small"),
         pretrained=cfg["model"]["encoder_pretrained"],
         img_size=img_size,
         patch_size=cfg["model"]["patch_size"],
         decoder_blocks=cfg["model"]["decoder_blocks"],
-        embed_dim=cfg["model"]["embed_dim"],
-        num_heads=cfg["model"]["num_heads"],
+        output_size=cfg["model"].get("output_size", None),
     ).to(device)
 
     freeze_encoder = cfg["training"].get("freeze_encoder", False)

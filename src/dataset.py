@@ -15,17 +15,18 @@ _IMAGENET_STD  = [0.229, 0.224, 0.225]
 
 
 class DepthDataset(Dataset):
-    def __init__(self, image_dir: str, depth_dir: str, img_size: int = 560, augment: bool = False):
+    def __init__(self, image_dir: str, depth_dir: str, img_size: int = 224, depth_size: int = None, augment: bool = False):
         self.image_paths = sorted(
             glob.glob(os.path.join(image_dir, "*.png")) +
             glob.glob(os.path.join(image_dir, "*.jpg"))
         )
         if not self.image_paths:
             raise FileNotFoundError(f"No images found in {image_dir}")
-        self.depth_dir = depth_dir
-        self.img_size = img_size
-        self.augment = augment
-        self.normalize = T.Normalize(mean=_IMAGENET_MEAN, std=_IMAGENET_STD)
+        self.depth_dir  = depth_dir
+        self.img_size   = img_size
+        self.depth_size = depth_size or img_size  # GT resolution for loss
+        self.augment    = augment
+        self.normalize  = T.Normalize(mean=_IMAGENET_MEAN, std=_IMAGENET_STD)
 
     def _depth_path(self, image_path: str) -> str:
         stem = os.path.splitext(os.path.basename(image_path))[0]
@@ -42,9 +43,9 @@ class DepthDataset(Dataset):
 
         image = image.resize((self.img_size, self.img_size), Image.LANCZOS)
         depth_h, depth_w = depth.shape[:2]
-        if depth_h != self.img_size or depth_w != self.img_size:
+        if depth_h != self.depth_size or depth_w != self.depth_size:
             depth = np.array(
-                Image.fromarray(depth).resize((self.img_size, self.img_size), Image.NEAREST)
+                Image.fromarray(depth).resize((self.depth_size, self.depth_size), Image.NEAREST)
             )
 
         if self.augment and random.random() > 0.5:

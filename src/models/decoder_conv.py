@@ -23,7 +23,7 @@ class ConvDecoder(nn.Module):
         assert patch_size == 16, "ConvDecoder assumes patch_size=16 (4 × 2x upsample stages)"
         self.patch_grid = patch_grid
         self.stages = nn.ModuleList([
-            ConvBlock(384, 256),
+            ConvBlock(embed_dim, 256),
             ConvBlock(256, 128),
             ConvBlock(128, 64),
             ConvBlock(64, 32),

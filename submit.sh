@@ -34,6 +34,7 @@ SCRIPT="${SCRIPT:-train}"                     # train | train_in_context
 STRATEGY="${STRATEGY:-random}"                # random | patch_sim | gt_depth_sim | learned
 DECODER="${DECODER:-transformer}"             # transformer | conv  (baseline only)
 EPOCHS="${EPOCHS:-}"                          # leave empty to use config default
+CONFIG="${CONFIG:-}"                          # override config file (e.g. configs/config_base.yaml)
 
 # ── Paths ─────────────────────────────────────────────────────────────────────
 REPO="/work/scratch/cdeubel/CIL"
@@ -65,7 +66,9 @@ echo "========================================"
 nvidia-smi --query-gpu=name,memory.total --format=csv,noheader
 
 # ── Patch data_root without touching committed config ─────────────────────────
-if [ "$SCRIPT" = "train_in_context" ]; then
+if [ -n "$CONFIG" ]; then
+    BASE_CONFIG="$CONFIG"
+elif [ "$SCRIPT" = "train_in_context" ]; then
     BASE_CONFIG="configs/config_in_context.yaml"
 else
     BASE_CONFIG="configs/config.yaml"
