@@ -17,7 +17,8 @@ def main():
     parser.add_argument("--checkpoint", required=True, help="path to best.pth")
     parser.add_argument("--test_dir",   required=True, help="directory of test images")
     parser.add_argument("--output_dir", default="predictions/", help="where to save .npy files")
-    parser.add_argument("--batch_size", type=int, default=8)
+    parser.add_argument("--batch_size",   type=int, default=8)
+    parser.add_argument("--output_size",  type=int, default=560, help="spatial size to upsample predictions before saving")
     args = parser.parse_args()
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -48,6 +49,10 @@ def main():
             images = images.to(device)
             with autocast("cuda", enabled=cfg["training"]["amp"]):
                 preds = model(images)  # (B, 1, H, W)
+            if args.output_size != cfg["model"]["img_size"]:
+                preds = torch.nn.functional.interpolate(
+                    preds, size=(args.output_size, args.output_size), mode="bilinear", align_corners=False
+                )
             preds = preds.squeeze(1).cpu().numpy()  # (B, H, W)
             for pred, stem in zip(preds, stems):
                 out_stem = stem.replace("_rgb", "_depth")
