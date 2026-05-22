@@ -19,6 +19,7 @@ training:
   epochs: 50
   batch_size: 64
   lr: 1.0e-4
+  freeze_encoder: true
   weight_decay: 0.01
   grad_clip: 1.0
   amp: true

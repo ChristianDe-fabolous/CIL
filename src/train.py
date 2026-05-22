@@ -65,6 +65,7 @@ def main():
     parser.add_argument("--config", default="configs/config.yaml")
     parser.add_argument("--decoder", choices=["transformer", "conv"], help="override decoder_type")
     parser.add_argument("--pretrained", type=lambda x: x.lower() == "true", help="override encoder_pretrained")
+    parser.add_argument("--freeze_encoder", action="store_true", help="freeze ViT encoder weights")
     args = parser.parse_args()
 
     cfg = load_config(args.config)
@@ -72,6 +73,8 @@ def main():
         cfg["model"]["decoder_type"] = args.decoder
     if args.pretrained is not None:
         cfg["model"]["encoder_pretrained"] = args.pretrained
+    if args.freeze_encoder:
+        cfg["training"]["freeze_encoder"] = True
 
     set_seed(cfg["training"]["seed"])
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -109,12 +112,20 @@ def main():
         embed_dim=cfg["model"]["embed_dim"],
         num_heads=cfg["model"]["num_heads"],
     ).to(device)
+
+    freeze_encoder = cfg["training"].get("freeze_encoder", False)
+    if freeze_encoder:
+        for p in model.encoder.parameters():
+            p.requires_grad = False
+        print("encoder frozen")
+
     n_params = sum(p.numel() for p in model.parameters()) / 1e6
-    print(f"params={n_params:.1f}M")
+    n_trainable = sum(p.numel() for p in model.parameters() if p.requires_grad) / 1e6
+    print(f"params={n_params:.1f}M  trainable={n_trainable:.1f}M")
 
     # --- optimizer ---
     optimizer = torch.optim.AdamW(
-        model.parameters(),
+        filter(lambda p: p.requires_grad, model.parameters()),
         lr=cfg["training"]["lr"],
         weight_decay=cfg["training"]["weight_decay"],
     )

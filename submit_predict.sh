@@ -18,10 +18,9 @@
 #SBATCH --mail-user=cdeubel@ethz.ch
 #SBATCH --mail-type=END,FAIL
 
-# ── Required ──────────────────────────────────────────────────────────────────
-: "${CHECKPOINT:?ERROR: set CHECKPOINT=/work/scratch/cdeubel/CIL/checkpoints/vit_depth_transformer_pretrainedTrue
-/best.pth}"
-: "${TEST_DIR:?ERROR: set TEST_DIR=/cluster/courses/cil/monocular-depth-estimation/test/images}"
+# ── Required (override via env vars) ─────────────────────────────────────────
+CHECKPOINT="${CHECKPOINT:-/work/scratch/cdeubel/CIL/checkpoints/vit_depth_transformer_pretrainedTrue/best.pth}"
+TEST_DIR="${TEST_DIR:-/cluster/courses/cil/monocular-depth-estimation/test/images}"
 
 # ── Defaults ──────────────────────────────────────────────────────────────────
 BATCH_SIZE="${BATCH_SIZE:-8}"
