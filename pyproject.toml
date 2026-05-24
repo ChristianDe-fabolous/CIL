@@ -13,6 +13,7 @@ dependencies = [
     "kagglehub>=0.3.0",
     "kaggle>=1.8.0",
     "pandas>=2.0.0",
+    "ipykernel>=6.0.0",
 ]
 
 [tool.uv.sources]
