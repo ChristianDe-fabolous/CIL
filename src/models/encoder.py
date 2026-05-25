@@ -47,3 +47,40 @@ class DepthAnythingEncoder(nn.Module):
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         out = self.backbone(pixel_values=x)
         return out.last_hidden_state[:, 1:, :]  # drop CLS → (B, N, D)
+
+
+class DA2Encoder(nn.Module):
+    """
+    Depth Anything V2 with DPT-style multi-layer feature extraction.
+
+    Instead of taking only the last transformer layer (like DepthAnythingEncoder),
+    this samples 4 evenly-spaced layers and averages them.  Early layers carry
+    fine-grained spatial detail; late layers carry semantic depth context.
+    Averaging gives the DiT denoiser access to both simultaneously.
+    """
+
+    _HF_NAMES = {
+        "small": "depth-anything/Depth-Anything-V2-Small-hf",
+        "base":  "depth-anything/Depth-Anything-V2-Base-hf",
+        "large": "depth-anything/Depth-Anything-V2-Large-hf",
+    }
+
+    def __init__(self, size: str = "base", img_size: int = 560):
+        super().__init__()
+        from transformers import AutoModelForDepthEstimation
+        da = AutoModelForDepthEstimation.from_pretrained(self._HF_NAMES[size])
+        self.backbone   = da.backbone
+        self.patch_size: int = self.backbone.config.patch_size
+        self.embed_dim:  int = self.backbone.config.hidden_size
+        self.patch_grid: int = img_size // self.patch_size
+        self.num_layers: int = self.backbone.config.num_hidden_layers
+
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+        out = self.backbone(pixel_values=x, output_hidden_states=True)
+        # hidden_states[0] = patch embedding, [1..L] = transformer layers
+        layers = out.hidden_states[1:]          # L tensors of (B, N+1, D)
+        n      = len(layers)
+        # 4 evenly-spaced indices: first, 1/3, 2/3, last
+        idx    = [0, n // 3, 2 * n // 3, n - 1]
+        selected = [layers[i][:, 1:, :] for i in idx]   # drop CLS each
+        return torch.stack(selected, dim=0).mean(0)       # (B, N, D)

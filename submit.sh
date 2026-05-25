@@ -30,11 +30,11 @@
 # ─────────────────────────────────────────────────────────────────────────────
 
 # ── Defaults (override via env vars at sbatch time) ───────────────────────────
-SCRIPT="${SCRIPT:-train}"                     # train | train_in_context
+SCRIPT="${SCRIPT:-train}"                     # train | train_in_context | train_diffusion | train_lora
 STRATEGY="${STRATEGY:-random}"                # random | patch_sim | gt_depth_sim | learned
 DECODER="${DECODER:-transformer}"             # transformer | conv  (baseline only)
 EPOCHS="${EPOCHS:-}"                          # leave empty to use config default
-CONFIG="${CONFIG:-}"                          # override config file (e.g. configs/config_base.yaml)
+CONFIG="${CONFIG:-}"                          # override config file (e.g. configs/config_diffusion.yaml)
 
 # ── Paths ─────────────────────────────────────────────────────────────────────
 REPO="/work/scratch/cdeubel/CIL"
@@ -70,6 +70,10 @@ if [ -n "$CONFIG" ]; then
     BASE_CONFIG="$CONFIG"
 elif [ "$SCRIPT" = "train_in_context" ]; then
     BASE_CONFIG="configs/config_in_context.yaml"
+elif [ "$SCRIPT" = "train_diffusion" ]; then
+    BASE_CONFIG="configs/config_diffusion.yaml"
+elif [ "$SCRIPT" = "train_lora" ]; then
+    BASE_CONFIG="configs/config_lora.yaml"
 else
     BASE_CONFIG="configs/config.yaml"
 fi

@@ -1,0 +1,30 @@
+model:
+  encoder_size: base     # small | base | large
+  img_size: 518          # DA2 native input resolution
+  output_size: 560       # upsample predictions to this for loss + saving
+
+lora:
+  r: 16
+  alpha: 32
+  dropout: 0.05
+
+data:
+  data_root: data/
+  train_image_dir: train
+  train_depth_dir: train
+  test_image_dir: test/images
+  num_workers: 3
+  val_split: 0.1
+
+training:
+  epochs: 10
+  batch_size: 4          # DA2-base at 518px fits bs=4 on 2080 Ti
+  lr: 5.0e-5
+  weight_decay: 0.01
+  grad_clip: 1.0
+  amp: true
+  seed: 42
+
+logging:
+  log_interval: 20
+  checkpoint_dir: checkpoints/

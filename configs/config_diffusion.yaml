@@ -1,0 +1,28 @@
+model:
+  encoder_size: base     # DA2 ViT-B frozen, multi-layer features (embed_dim=768)
+  img_size: 560
+  patch_size: 14
+  base_ch: 32            # U-Net base channels → max 256 at bottleneck
+  t_dim: 256             # timestep embedding dim
+  T: 1000
+
+data:
+  data_root: data/
+  train_image_dir: train
+  train_depth_dir: train
+  test_image_dir: test/images
+  num_workers: 3
+  val_split: 0.1
+
+training:
+  epochs: 30
+  batch_size: 2          # 560px full-res U-Net, safe on 16GB with AMP
+  lr: 5.0e-5
+  weight_decay: 0.01
+  grad_clip: 1.0
+  amp: true
+  seed: 42
+
+logging:
+  log_interval: 20
+  checkpoint_dir: checkpoints/
